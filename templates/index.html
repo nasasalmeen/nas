@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Survival Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient-1: #1a1a2e;
+            --bg-gradient-2: #16213e;
+            --card-bg: #ffffff;
+            --card-header-1: #0f3460;
+            --card-header-2: #16213e;
+            --text-color: #333;
+            --text-muted: #6c757d;
+            --input-bg: #fff;
+            --input-border: #ced4da;
+            --shadow-color: rgba(0,0,0,0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-gradient-1: #e8f4f8;
+            --bg-gradient-2: #d1e8ef;
+            --card-bg: #ffffff;
+            --card-header-1: #0f3460;
+            --card-header-2: #16213e;
+            --text-color: #333;
+            --text-muted: #6c757d;
+            --input-bg: #fff;
+            --input-border: #ced4da;
+            --shadow-color: rgba(0,0,0,0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient-1: #1a1a2e;
+            --bg-gradient-2: #16213e;
+            --card-bg: #252542;
+            --card-header-1: #0f3460;
+            --card-header-2: #16213e;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --input-bg: #1e1e3a;
+            --input-border: #3a3a5c;
+            --shadow-color: rgba(0,0,0,0.4);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            min-height: 100vh;
+            padding: 40px 0;
+            transition: all 0.3s ease;
+        }
+
+        [lang="ar"] body, [lang="ar"] .card, [lang="ar"] input, [lang="ar"] select, [lang="ar"] button {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px var(--shadow-color);
+            background-color: var(--card-bg);
+        }
+        .card-header {
+            background: linear-gradient(135deg, var(--card-header-1) 0%, var(--card-header-2) 100%);
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+        .card-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .card-body {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560 0%, #0f3460 100%);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0f3460 0%, #e94560 100%);
+        }
+        .result-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .survived {
+            background-color: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        .not-survived {
+            background-color: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        .form-control, .form-select {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-color);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        .card-footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--input-border);
+        }
+        .card-footer small {
+            color: var(--text-muted);
+        }
+
+        /* Toggle buttons */
+        .toggle-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        [dir="rtl"] .toggle-controls {
+            right: auto;
+            left: 20px;
+        }
+        .toggle-btn {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .toggle-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Video Background */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        [data-theme="light"] .video-overlay {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        [data-theme="dark"] .video-overlay {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        body {
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="https://cdn.pixabay.com/video/2020/07/30/45901-446250157_large.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="video-overlay"></div>
+
+    <!-- Toggle Controls -->
+    <div class="toggle-controls">
+        <button class="toggle-btn" id="themeToggle" onclick="toggleTheme()">
+            <span id="themeIcon">🌙</span>
+        </button>
+        <button class="toggle-btn" id="langToggle" onclick="toggleLanguage()">
+            <span id="langText">عربي</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-header text-white text-center">
+                        <h1>🚢 <span data-en="Titanic Survival Predictor" data-ar="متنبئ النجاة من تيتانيك">Titanic Survival Predictor</span></h1>
+                        <p class="mb-0" data-en="Enter passenger details to predict survival" data-ar="أدخل بيانات الراكب للتنبؤ بالنجاة">Enter passenger details to predict survival</p>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            <span data-en="Error:" data-ar="خطأ:">Error:</span> {{ error }}
+                        </div>
+                        {% endif %}
+
+                        {% if prediction %}
+                        <div class="result-box {% if prediction.survived %}survived{% else %}not-survived{% endif %}">
+                            <h4 class="text-center">
+                                {% if prediction.survived %}
+                                    ✅ <span data-en="Likely Survived!" data-ar="من المرجح أنه نجا!">Likely Survived!</span>
+                                {% else %}
+                                    ❌ <span data-en="Likely Did Not Survive" data-ar="من المرجح أنه لم ينجُ">Likely Did Not Survive</span>
+                                {% endif %}
+                            </h4>
+                            <p class="text-center mb-0">
+                                <span data-en="Survival Probability:" data-ar="احتمالية النجاة:">Survival Probability:</span> <strong>{{ prediction.probability }}</strong>
+                            </p>
+                        </div>
+                        <hr>
+                        {% endif %}
+
+                        <form action="/predict" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="pclass" class="form-label" data-en="Passenger Class" data-ar="درجة الراكب">Passenger Class</label>
+                                    <select class="form-select" id="pclass" name="pclass" required>
+                                        <option value="1" {% if form_data and form_data.pclass == '1' %}selected{% endif %} data-en="1st Class" data-ar="الدرجة الأولى">1st Class</option>
+                                        <option value="2" {% if form_data and form_data.pclass == '2' %}selected{% endif %} data-en="2nd Class" data-ar="الدرجة الثانية">2nd Class</option>
+                                        <option value="3" {% if form_data and form_data.pclass == '3' %}selected{% endif %} data-en="3rd Class" data-ar="الدرجة الثالثة">3rd Class</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="sex" class="form-label" data-en="Sex" data-ar="الجنس">Sex</label>
+                                    <select class="form-select" id="sex" name="sex" required>
+                                        <option value="male" {% if form_data and form_data.sex == 'male' %}selected{% endif %} data-en="Male" data-ar="ذكر">Male</option>
+                                        <option value="female" {% if form_data and form_data.sex == 'female' %}selected{% endif %} data-en="Female" data-ar="أنثى">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="age" class="form-label" data-en="Age" data-ar="العمر">Age</label>
+                                    <input type="number" class="form-control" id="age" name="age"
+                                           min="0" max="100" step="0.5" required
+                                           value="{{ form_data.age if form_data else '30' }}">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="fare" class="form-label" data-en="Fare (£)" data-ar="السعر (£)">Fare (£)</label>
+                                    <input type="number" class="form-control" id="fare" name="fare"
+                                           min="0" max="600" step="0.01" required
+                                           value="{{ form_data.fare if form_data else '32.00' }}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="sibsp" class="form-label" data-en="Siblings/Spouses Aboard" data-ar="الأشقاء/الأزواج على متن السفينة">Siblings/Spouses Aboard</label>
+                                    <input type="number" class="form-control" id="sibsp" name="sibsp"
+                                           min="0" max="10" required
+                                           value="{{ form_data.sibsp if form_data else '0' }}">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="parch" class="form-label" data-en="Parents/Children Aboard" data-ar="الآباء/الأطفال على متن السفينة">Parents/Children Aboard</label>
+                                    <input type="number" class="form-control" id="parch" name="parch"
+                                           min="0" max="10" required
+                                           value="{{ form_data.parch if form_data else '0' }}">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="embarked" class="form-label" data-en="Port of Embarkation" data-ar="ميناء الصعود">Port of Embarkation</label>
+                                <select class="form-select" id="embarked" name="embarked" required>
+                                    <option value="C" {% if form_data and form_data.embarked == 'C' %}selected{% endif %} data-en="Cherbourg (C)" data-ar="شيربورغ (C)">Cherbourg (C)</option>
+                                    <option value="Q" {% if form_data and form_data.embarked == 'Q' %}selected{% endif %} data-en="Queenstown (Q)" data-ar="كوينزتاون (Q)">Queenstown (Q)</option>
+                                    <option value="S" {% if form_data and form_data.embarked == 'S' %}selected{% endif %} data-en="Southampton (S)" data-ar="ساوثهامبتون (S)">Southampton (S)</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" data-en="Predict Survival" data-ar="تنبؤ بالنجاة">Predict Survival</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted text-center">
+                        <small data-en="Model trained on Titanic passenger data using Random Forest" data-ar="تم تدريب النموذج على بيانات ركاب تيتانيك باستخدام Random Forest">Model trained on Titanic passenger data using Random Forest</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Language Toggle
+        function toggleLanguage() {
+            const html = document.documentElement;
+            const currentLang = html.getAttribute('lang');
+            const newLang = currentLang === 'en' ? 'ar' : 'en';
+
+            html.setAttribute('lang', newLang);
+            html.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
+            localStorage.setItem('lang', newLang);
+
+            document.getElementById('langText').textContent = newLang === 'en' ? 'عربي' : 'English';
+
+            // Update all translatable elements
+            document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+                el.textContent = el.getAttribute('data-' + newLang);
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+            // Load saved language
+            const savedLang = localStorage.getItem('lang') || 'en';
+            if (savedLang !== 'en') {
+                document.documentElement.setAttribute('lang', savedLang);
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.getElementById('langText').textContent = 'English';
+
+                document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+                    el.textContent = el.getAttribute('data-' + savedLang);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

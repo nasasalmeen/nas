@@ -100,6 +100,33 @@
             border: 2px solid #dc3545;
             color: #721c24;
         }
+        [data-theme="dark"] .survived {
+            background-color: #1a3d2b;
+            border-color: #28a745;
+            color: #6fcf97;
+        }
+        [data-theme="dark"] .not-survived {
+            background-color: #3d1a1e;
+            border-color: #dc3545;
+            color: #f28b94;
+        }
+        .confidence-meter {
+            margin-top: 14px;
+        }
+        .confidence-meter .progress {
+            height: 18px;
+            border-radius: 10px;
+            background-color: rgba(0,0,0,0.1);
+        }
+        [data-theme="dark"] .confidence-meter .progress {
+            background-color: rgba(255,255,255,0.1);
+        }
+        .confidence-meter .progress-bar {
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            transition: width 1s ease-in-out;
+        }
         .form-label {
             font-weight: 500;
             color: var(--text-color);
@@ -147,6 +174,10 @@
         }
         .toggle-btn:hover {
             transform: scale(1.05);
+        }
+        a.toggle-btn {
+            text-decoration: none;
+            color: var(--text-color);
         }
 
         /* Video Background */
@@ -201,6 +232,9 @@
 
     <!-- Toggle Controls -->
     <div class="toggle-controls">
+        <a href="/" class="toggle-btn" id="homeBtn">
+            🏠 <span data-en="Home" data-ar="الرئيسية">Home</span>
+        </a>
         <button class="toggle-btn" id="themeToggle" onclick="toggleTheme()">
             <span id="themeIcon">🌙</span>
         </button>
@@ -236,6 +270,34 @@
                             <p class="text-center mb-0">
                                 <span data-en="Survival Probability:" data-ar="احتمالية النجاة:">Survival Probability:</span> <strong>{{ prediction.probability }}</strong>
                             </p>
+                            <div class="confidence-meter">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small data-en="Confidence Meter" data-ar="مقياس الثقة">Confidence Meter</small>
+                                    <small>
+                                        {% if prediction.probability_value >= 60 %}
+                                            <span data-en="High" data-ar="عالية">High</span>
+                                        {% elif prediction.probability_value >= 40 %}
+                                            <span data-en="Moderate" data-ar="متوسطة">Moderate</span>
+                                        {% else %}
+                                            <span data-en="Low" data-ar="منخفضة">Low</span>
+                                        {% endif %}
+                                        — {{ prediction.probability }}
+                                    </small>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated
+                                        {% if prediction.probability_value >= 60 %}bg-success
+                                        {% elif prediction.probability_value >= 40 %}bg-warning
+                                        {% else %}bg-danger{% endif %}"
+                                        role="progressbar"
+                                        style="width: {{ prediction.probability_value }}%"
+                                        aria-valuenow="{{ prediction.probability_value }}"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100">
+                                        {{ prediction.probability }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <hr>
                         {% endif %}

@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 app = Flask(__name__)
+application = app  # Required for Elastic Beanstalk
 
 MODEL_PATH = 'model.pkl'
 
@@ -113,7 +114,8 @@ def predict():
 
         result = {
             'survived': bool(prediction),
-            'probability': f"{probability[1] * 100:.1f}%"
+            'probability': f"{probability[1] * 100:.1f}%",
+            'probability_value': round(probability[1] * 100, 1)
         }
 
         return render_template('index.html', prediction=result, form_data=request.form)

@@ -180,55 +180,87 @@
             color: var(--text-color);
         }
 
-        /* Video Background */
-        .video-background {
+        /* Storm Background */
+        .storm-background {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
             overflow: hidden;
+            background: linear-gradient(180deg, #05080f 0%, #0a1525 55%, #0d1e30 100%);
+            animation: stormySky 9s ease-in-out infinite alternate;
         }
-        .video-background video {
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
+        [data-theme="light"] .storm-background {
+            background: linear-gradient(180deg, #1c2e45 0%, #2e4a65 55%, #3a5f80 100%);
+            animation: stormySkyLight 9s ease-in-out infinite alternate;
+        }
+        @keyframes stormySky {
+            0%   { background: linear-gradient(180deg, #05080f 0%, #0a1525 55%, #0d1e30 100%); }
+            50%  { background: linear-gradient(180deg, #080d18 0%, #0f1e35 55%, #0a1828 100%); }
+            100% { background: linear-gradient(180deg, #030508 0%, #070e1c 55%, #090f1e 100%); }
+        }
+        @keyframes stormySkyLight {
+            0%   { background: linear-gradient(180deg, #1c2e45 0%, #2e4a65 55%, #3a5f80 100%); }
+            50%  { background: linear-gradient(180deg, #162438 0%, #253e57 55%, #2e4e6a 100%); }
+            100% { background: linear-gradient(180deg, #111c2c 0%, #1e3248 55%, #253d58 100%); }
+        }
+
+        /* Rain */
+        .rain-drop {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            object-fit: cover;
+            width: 1px;
+            background: linear-gradient(transparent, rgba(174, 214, 241, 0.55));
+            animation: rainfall linear infinite;
         }
-        .video-overlay {
+        [data-theme="light"] .rain-drop {
+            background: linear-gradient(transparent, rgba(100, 160, 210, 0.6));
+        }
+        @keyframes rainfall {
+            0%   { top: -60px; opacity: 0; }
+            8%   { opacity: 1; }
+            92%  { opacity: 0.7; }
+            100% { top: 110vh; opacity: 0; }
+        }
+
+        /* Lightning */
+        .lightning-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: -1;
-            background: rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            background: rgba(210, 230, 255, 0.18);
+            transition: opacity 0.05s;
         }
-        [data-theme="light"] .video-overlay {
-            background: rgba(255, 255, 255, 0.3);
+        .lightning-overlay.flash {
+            opacity: 1;
         }
-        [data-theme="dark"] .video-overlay {
-            background: rgba(0, 0, 0, 0.5);
+
+        /* Dark overlay for readability */
+        .storm-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: rgba(0, 0, 0, 0.35);
         }
+        [data-theme="light"] .storm-overlay {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
         body {
             background: transparent;
         }
     </style>
 </head>
 <body>
-    <!-- Video Background -->
-    <div class="video-background">
-        <video autoplay muted loop playsinline>
-            <source src="https://cdn.pixabay.com/video/2020/07/30/45901-446250157_large.mp4" type="video/mp4">
-        </video>
+    <!-- Storm Background -->
+    <div class="storm-background" id="stormBg">
+        <div id="rainContainer"></div>
     </div>
-    <div class="video-overlay"></div>
+    <div class="lightning-overlay" id="lightningOverlay"></div>
+    <div class="storm-overlay"></div>
 
     <!-- Toggle Controls -->
     <div class="toggle-controls">
@@ -427,6 +459,42 @@
                 });
             }
         });
+    </script>
+
+    <script>
+        // ---- Storm Effect ----
+        function createRain() {
+            const container = document.getElementById('rainContainer');
+            for (let i = 0; i < 160; i++) {
+                const drop = document.createElement('div');
+                drop.classList.add('rain-drop');
+                drop.style.left              = (Math.random() * 100) + '%';
+                drop.style.height            = (Math.random() * 18 + 8) + 'px';
+                drop.style.animationDuration = (Math.random() * 0.6 + 0.4) + 's';
+                drop.style.animationDelay    = (Math.random() * 3) + 's';
+                drop.style.opacity           = (Math.random() * 0.4 + 0.3).toString();
+                container.appendChild(drop);
+            }
+        }
+
+        function triggerLightning() {
+            const overlay = document.getElementById('lightningOverlay');
+            overlay.classList.add('flash');
+            setTimeout(() => {
+                overlay.classList.remove('flash');
+                // occasional double-flash
+                if (Math.random() > 0.45) {
+                    setTimeout(() => {
+                        overlay.classList.add('flash');
+                        setTimeout(() => overlay.classList.remove('flash'), 70);
+                    }, 120);
+                }
+            }, 90);
+            setTimeout(triggerLightning, Math.random() * 7000 + 2500);
+        }
+
+        createRain();
+        setTimeout(triggerLightning, Math.random() * 2000 + 800);
     </script>
 </body>
 </html>
